@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Grammatik: Das Kuckucksei (В, ВО, НА)</title>
+    <style>
+        :root {
+            /* Grünes Farbschema */
+            --primary-dark: #1b5e20;
+            --primary-medium: #2e7d32;
+            --primary-light: #4caf50;
+            --bg-color: #e8f5e9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --error-color: #d32f2f;
+            --success-color: #388e3c;
+            --neutral-btn: #757575;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            background-color: var(--primary-medium);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            margin-top: 10px;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Aufgaben-Container */
+        .task-row {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-medium);
+        }
+
+        .task-title {
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Wort-Buttons */
+        .words-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .word-btn {
+            background-color: #f1f8e9;
+            border: 2px solid #c8e6c9;
+            border-radius: 6px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: var(--primary-dark);
+        }
+
+        .word-btn:hover {
+            background-color: #dcedc8;
+            transform: translateY(-2px);
+        }
+
+        .word-btn.selected {
+            background-color: var(--primary-medium);
+            color: white;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.3);
+        }
+
+        /* Status Farben für Ergebnisse */
+        .word-btn.correct-mark {
+            background-color: var(--success-color) !important;
+            color: white !important;
+            border-color: var(--primary-dark) !important;
+        }
+
+        .word-btn.wrong-mark {
+            background-color: var(--error-color) !important;
+            color: white !important;
+            border-color: #b71c1c !important;
+            opacity: 0.6;
+        }
+
+        /* Steuerungs-Buttons */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.2s;
+            flex-grow: 1;
+        }
+
+        .btn-check {
+            background-color: var(--primary-light);
+            color: white;
+        }
+        .btn-check:hover { background-color: var(--primary-medium); }
+
+        .btn-reset {
+            background-color: #9e9e9e;
+            color: white;
+        }
+        .btn-reset:hover { background-color: #757575; }
+
+        .btn-solve {
+            background-color: #ff9800;
+            color: white;
+        }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        /* Feedback Box */
+        .feedback-box {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none; /* Standardmäßig versteckt */
+            font-size: 0.95rem;
+        }
+
+        .feedback-success {
+            background-color: #e8f5e9;
+            border: 1px solid var(--success-color);
+            color: var(--primary-dark);
+        }
+
+        .feedback-error {
+            background-color: #ffebee;
+            border: 1px solid var(--error-color);
+            color: #c62828;
+        }
+
+        @media (max-width: 600px) {
+            .words-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Das Kuckucksei</h1>
+        <div class="subtitle">Präpositionen В, ВО und НА im Präpositiv</div>
+        <p style="font-size: 0.9rem; margin-top: 15px;">
+            Klicken Sie in jeder Reihe auf das Wort, das <strong>nicht</strong> zu den anderen passt (grammatikalisch oder logisch bezüglich der Präposition).
+        </p>
+    </header>
+
+    <!-- Reihe 1 -->
+    <div class="task-row" id="row-1">
+        <span class="task-title">1. Institutionen und öffentliche Orte</span>
+        <div class="words-container">
+            <div class="word-btn" onclick="selectWord(1, 0)">стадион</div>
+            <div class="word-btn" onclick="selectWord(1, 1)">почта</div>
+            <div class="word-btn" onclick="selectWord(1, 2)">театр</div>
+            <div class="word-btn" onclick="selectWord(1, 3)">вокзал</div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-check" onclick="checkRow(1)">Überprüfen</button>
+            <button class="btn btn-reset" onclick="resetRow(1)">Zurücksetzen</button>
+            <button class="btn btn-solve" onclick="showSolution(1)">Lösung anzeigen</button>
+        </div>
+        <div class="feedback-box" id="feedback-1"></div>
+    </div>
+
+    <!-- Reihe 2 -->
+    <div class="task-row" id="row-2">
+        <span class="task-title">2. Orte in der Stadt</span>
+        <div class="words-container">
+            <div class="word-btn" onclick="selectWord(2, 0)">парк</div>
+            <div class="word-btn" onclick="selectWord(2, 1)">площадь</div>
+            <div class="word-btn" onclick="selectWord(2, 2)">магазин</div>
+            <div class="word-btn" onclick="selectWord(2, 3)">музей</div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-check" onclick="checkRow(2)">Überprüfen</button>
+            <button class="btn btn-reset" onclick="resetRow(2)">Zurücksetzen</button>
+            <button class="btn btn-solve" onclick="showSolution(2)">Lösung anzeigen</button>
+        </div>
+        <div class="feedback-box" id="feedback-2"></div>
+    </div>
+
+    <!-- Reihe 3 -->
+    <div class="task-row" id="row-3">
+        <span class="task-title">3. Länder und Städte (Phonetik)</span>
+        <div class="words-container">
+            <div class="word-btn" onclick="selectWord(3, 0)">Владивосток</div>
+            <div class="word-btn" onclick="selectWord(3, 1)">Вьетнам</div>
+            <div class="word-btn" onclick="selectWord(3, 2)">Франция</div>
+            <div class="word-btn" onclick="selectWord(3, 3)">Берлин</div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-check" onclick="checkRow(3)">Überprüfen</button>
+            <button class="btn btn-reset" onclick="resetRow(3)">Zurücksetzen</button>
+            <button class="btn btn-solve" onclick="showSolution(3)">Lösung anzeigen</button>
+        </div>
+        <div class="feedback-box" id="feedback-3"></div>
+    </div>
+
+    <!-- Reihe 4 -->
+    <div class="task-row" id="row-4">
+        <span class="task-title">4. Geografie</span>
+        <div class="words-container">
+            <div class="word-btn" onclick="selectWord(4, 0)">север</div>
+            <div class="word-btn" onclick="selectWord(4, 1)">юг</div>
+            <div class="word-btn" onclick="selectWord(4, 2)">Сибирь</div>
+            <div class="word-btn" onclick="selectWord(4, 3)">Кипр</div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-check" onclick="checkRow(4)">Überprüfen</button>
+            <button class="btn btn-reset" onclick="resetRow(4)">Zurücksetzen</button>
+            <button class="btn btn-solve" onclick="showSolution(4)">Lösung anzeigen</button>
+        </div>
+        <div class="feedback-box" id="feedback-4"></div>
+    </div>
+
+    <!-- Reihe 5 -->
+    <div class="task-row" id="row-5">
+        <span class="task-title">5. Veranstaltungen vs. Gebäude</span>
+        <div class="words-container">
+            <div class="word-btn" onclick="selectWord(5, 0)">экскурсия</div>
+            <div class="word-btn" onclick="selectWord(5, 1)">библиотека</div>
+            <div class="word-btn" onclick="selectWord(5, 2)">выставка</div>
+            <div class="word-btn" onclick="selectWord(5, 3)">работа</div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-check" onclick="checkRow(5)">Überprüfen</button>
+            <button class="btn btn-reset" onclick="resetRow(5)">Zurücksetzen</button>
+            <button class="btn btn-solve" onclick="showSolution(5)">Lösung anzeigen</button>
+        </div>
+        <div class="feedback-box" id="feedback-5"></div>
+    </div>
+
+    <!-- Reihe 6 -->
+    <div class="task-row" id="row-6">
+        <span class="task-title">6. Arbeit und Freizeit</span>
+        <div class="words-container">
+            <div class="word-btn" onclick="selectWord(6, 0)">фабрика</div>
+            <div class="word-btn" onclick="selectWord(6, 1)">завод</div>
+            <div class="word-btn" onclick="selectWord(6, 2)">ресторан</div>
+            <div class="word-btn" onclick="selectWord(6, 3)">кухня</div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-check" onclick="checkRow(6)">Überprüfen</button>
+            <button class="btn btn-reset" onclick="resetRow(6)">Zurücksetzen</button>
+            <button class="btn btn-solve" onclick="showSolution(6)">Lösung anzeigen</button>
+        </div>
+        <div class="feedback-box" id="feedback-6"></div>
+    </div>
+
+</div>
+
+<script>
+    // Konfiguration der richtigen Antworten und Erklärungen
+    // Index beginnt bei 0
+    const solutions = {
+        1: {
+            index: 2,
+            word: "театр",
+            explanation: "Richtig! 'Театр' ist ein geschlossenes Gebäude und verwendet die Präposition <strong>В</strong> (в театре). Die anderen Wörter (стадион, почта, вокзал) verwenden typischerweise <strong>НА</strong>."
+        },
+        2: {
+            index: 1,
+            word: "площадь",
+            explanation: "Korrekt! 'Площадь' (der Platz) ist eine offene Fläche und verlangt <strong>НА</strong> (на площади). Die anderen sind geschlossene Räume mit <strong>В</strong>."
+        },
+        3: {
+            index: 3,
+            word: "Берлин",
+            explanation: "Genau! 'Берлин' verwendet die Standardpräposition <strong>В</strong> (в Берлине). Die anderen beginnen mit В oder Ф plus Konsonant und benötigen die phonetische Variante <strong>ВО</strong> (во Франции, во Вьетнаме, во Владивостоке)."
+        },
+        4: {
+            index: 2,
+            word: "Сибирь",
+            explanation: "Richtig! 'Сибирь' ist eine Region/Gebiet und verlangt <strong>В</strong> (в Сибири). Himmelsrichtungen (север, юг) und Inseln (Кипр) verwenden <strong>НА</strong>."
+        },
+        5: {
+            index: 1,
+            word: "библиотека",
+            explanation: "Sehr gut! 'Библиотека' ist ein Gebäude/Raum und nutzt <strong>В</strong> (в библиотеке). Die anderen Wörter bezeichnen Veranstaltungen oder Aktivitäten und nutzen <strong>НА</strong>."
+        },
+        6: {
+            index: 2,
+            word: "ресторан",
+            explanation: "Stimmt! Im 'Ресторан' ist man drinnen, also <strong>В</strong> (в ресторане). Fabrik, Werk (Industrie) und Küche (Funktionsbereich) nutzen traditionell <strong>НА</strong>."
+        }
+    };
+
+    // Speichert die aktuelle Auswahl des Nutzers pro Reihe
+    const userSelections = {
+        1: null, 2: null, 3: null, 4: null, 5: null, 6: null
+    };
+
+    /**
+     * Wählt ein Wort in einer Reihe aus
+     */
+    function selectWord(rowId, wordIndex) {
+        // Status speichern
+        userSelections[rowId] = wordIndex;
+
+        // UI aktualisieren (Klasse 'selected' setzen)
+        const row = document.getElementById(`row-${rowId}`);
+        const buttons = row.querySelectorAll('.word-btn');
+        
+        // Alle Buttons zurücksetzen und Feedback verstecken bei neuer Auswahl
+        buttons.forEach((btn, idx) => {
+            btn.classList.remove('selected', 'correct-mark', 'wrong-mark');
+            if (idx === wordIndex) {
+                btn.classList.add('selected');
+            }
+        });
+
+        // Feedback verstecken, wenn der User neu wählt
+        const feedback = document.getElementById(`feedback-${rowId}`);
+        feedback.style.display = 'none';
+        feedback.className = 'feedback-box';
+    }
+
+    /**
+     * Überprüft die Auswahl in einer Reihe
+     */
+    function checkRow(rowId) {
+        const selection = userSelections[rowId];
+        const feedback = document.getElementById(`feedback-${rowId}`);
+        const correctIndex = solutions[rowId].index;
+        const row = document.getElementById(`row-${rowId}`);
+        const buttons = row.querySelectorAll('.word-btn');
+
+        if (selection === null) {
+            alert("Bitte wählen Sie zuerst ein Wort aus.");
+            return;
+        }
+
+        // Reset visual marks first
+        buttons.forEach(btn => btn.classList.remove('correct-mark', 'wrong-mark'));
+
+        feedback.style.display = 'block';
+
+        if (selection === correctIndex) {
+            // Richtig
+            buttons[selection].classList.add('correct-mark');
+            feedback.className = 'feedback-box feedback-success';
+            feedback.innerHTML = `<strong>Richtig!</strong> ${solutions[rowId].explanation}`;
+        } else {
+            // Falsch
+            buttons[selection].classList.add('wrong-mark');
+            feedback.className = 'feedback-box feedback-error';
+            feedback.innerHTML = "<strong>Leider falsch.</strong> Dieses Wort passt zur Gruppe oder ist nicht das gesuchte 'Kuckucksei'. Versuchen Sie es noch einmal!";
+        }
+    }
+
+    /**
+     * Setzt eine Reihe komplett zurück
+     */
+    function resetRow(rowId) {
+        userSelections[rowId] = null;
+        const row = document.getElementById(`row-${rowId}`);
+        const buttons = row.querySelectorAll('.word-btn');
+        
+        buttons.forEach(btn => {
+            btn.classList.remove('selected', 'correct-mark', 'wrong-mark');
+        });
+
+        const feedback = document.getElementById(`feedback-${rowId}`);
+        feedback.style.display = 'none';
+    }
+
+    /**
+     * Zeigt die Lösung direkt an
+     */
+    function showSolution(rowId) {
+        const correctIndex = solutions[rowId].index;
+        const row = document.getElementById(`row-${rowId}`);
+        const buttons = row.querySelectorAll('.word-btn');
+        const feedback = document.getElementById(`feedback-${rowId}`);
+
+        // Alles zurücksetzen
+        buttons.forEach(btn => btn.classList.remove('selected', 'correct-mark', 'wrong-mark'));
+
+        // Richtiges Wort markieren
+        buttons[correctIndex].classList.add('correct-mark');
+
+        // Erklärung anzeigen
+        feedback.style.display = 'block';
+        feedback.className = 'feedback-box feedback-success';
+        feedback.innerHTML = `<strong>Lösung:</strong> ${solutions[rowId].explanation}`;
+        
+        // Auswahl setzen, damit man nicht nochmal klicken muss
+        userSelections[rowId] = correctIndex;
+    }
+
+</script>
+
+</body>
+</html>
