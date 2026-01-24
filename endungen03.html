@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Präpositiv: Endungen ergänzen</title>
+    <style>
+        :root {
+            /* Farbschema: Grüntöne */
+            --bg-color: #f1f8e9;           /* Hintergrund hell */
+            --card-bg: #ffffff;            /* Karte Weiß */
+            --primary-dark: #2e7d32;       /* Dunkelgrün Texte */
+            --primary-light: #4caf50;      /* Standard Grün Buttons */
+            --accent-color: #a5d6a7;       /* Selektion Hintergrund */
+            --gap-color: #333;             /* Farbe der Lücke */
+            
+            --correct-bg: #c8e6c9;         /* Richtig Hintergrund */
+            --correct-text: #2e7d32;       /* Richtig Text */
+            --wrong-bg: #ffcdd2;           /* Falsch Hintergrund */
+            --wrong-text: #c62828;         /* Falsch Text */
+
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 100px; /* Platz für Footer */
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--primary-dark);
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; }
+        .subtitle { margin-top: 5px; opacity: 0.8; }
+
+        /* --- GRID LAYOUT --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* --- CARD STYLING --- */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border-top: 5px solid var(--primary-light);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        .emoji {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+        }
+
+        .hint {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 15px;
+            font-style: italic;
+            height: 20px; /* Feste Höhe für Ausrichtung */
+        }
+
+        .word-container {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            background: #fafafa;
+            padding: 10px 20px;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Die Lücke */
+        .gap {
+            display: inline-block;
+            min-width: 30px;
+            border-bottom: 3px solid var(--gap-color);
+            color: var(--primary-light);
+            padding: 0 2px;
+            transition: all 0.3s;
+        }
+
+        /* Feedback Zustände der Lücke */
+        .gap.filled { border-bottom-color: var(--primary-light); }
+        .gap.correct { color: var(--correct-text); border-bottom-color: var(--correct-text); }
+        .gap.wrong { color: var(--wrong-text); border-bottom-color: var(--wrong-text); }
+
+        /* --- BUTTONS (Rund) --- */
+        .options-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .option-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+            background-color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Touch-Optimierung */
+            touch-action: manipulation;
+        }
+
+        .option-btn:hover {
+            background-color: #f1f8e9;
+            border-color: var(--primary-light);
+        }
+
+        /* Aktiver/Gewählter Button */
+        .option-btn.active {
+            background-color: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Feedback Buttons */
+        .option-btn.mark-correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct-text);
+            color: var(--correct-text);
+        }
+        
+        .option-btn.mark-wrong {
+            opacity: 0.5;
+            background-color: #eee;
+        }
+
+        /* --- STEUERUNG (Unten) --- */
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .ctrl-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            min-width: 140px;
+        }
+
+        .ctrl-btn:active { transform: scale(0.95); }
+        .ctrl-btn:hover { opacity: 0.9; }
+
+        .btn-check { background-color: var(--primary-dark); }
+        .btn-reset { background-color: #757575; }
+        .btn-solve { background-color: #ff9800; }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .controls { flex-direction: column; gap: 10px; }
+            .ctrl-btn { width: 100%; }
+            body { padding-bottom: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Präpositiv: Die richtige Endung</h1>
+        <div class="subtitle">Wähle die passende Endung (е, и, у) für den markierten Kontext.</div>
+    </header>
+
+    <div class="grid-container" id="app">
+        <!-- Karten werden per JS generiert -->
+    </div>
+</div>
+
+<div class="controls">
+    <button class="ctrl-btn btn-check" onclick="checkAnswers()">Überprüfen</button>
+    <button class="ctrl-btn btn-reset" onclick="resetAnswers()">Zurücksetzen</button>
+    <button class="ctrl-btn btn-solve" onclick="showSolution()">Lösung anzeigen</button>
+</div>
+
+<script>
+    /*
+     * Datenmodell
+     * stem: Der Wortstamm inkl. Präposition
+     * correct: Die richtige Endung
+     * options: Array der möglichen Buttons
+     * hint: Übersetzung/Hinweis
+     */
+    const tasks = [
+        { id: 1, emoji: '🏫', hint: 'in der Schule', stem: 'в школ', correct: 'е', options: ['а', 'е', 'и'] },
+        { id: 2, emoji: '🇷🇺', hint: 'in Russland (-ия)', stem: 'в Росси', correct: 'и', options: ['е', 'и', 'я'] },
+        { id: 3, emoji: '🌲', hint: 'im Wald (Ausnahme!)', stem: 'в лес', correct: 'у', options: ['е', 'у', 'а'] },
+        { id: 4, emoji: '🍽️', hint: 'auf dem Tisch', stem: 'на стол', correct: 'е', options: ['у', 'и', 'е'] },
+        { id: 5, emoji: '🏟️', hint: 'auf dem Platz (-ь)', stem: 'на площад', correct: 'и', options: ['е', 'ь', 'и'] },
+        { id: 6, emoji: '✈️', hint: 'am Flughafen (Ausnahme!)', stem: 'в аэропорт', correct: 'у', options: ['е', 'у', 'а'] },
+        { id: 7, emoji: '🏭', hint: 'im Werk/in der Fabrik', stem: 'на завод', correct: 'е', options: ['е', 'у', 'ом'] },
+        { id: 8, emoji: '🏥', hint: 'im Sanatorium (-ий)', stem: 'в санатори', correct: 'и', options: ['е', 'ю', 'и'] },
+        { id: 9, emoji: '🧹', hint: 'auf dem Boden (Ausnahme!)', stem: 'на пол', correct: 'у', options: ['е', 'у', 'а'] },
+        { id: 10, emoji: '🎓', hint: 'in der Vorlesung (-ия)', stem: 'на лекци', correct: 'и', options: ['е', 'я', 'и'] },
+        { id: 11, emoji: '🛌', hint: 'im Bett (-ь)', stem: 'в кроват', correct: 'и', options: ['е', 'и', 'ь'] },
+        { id: 12, emoji: '🖼️', hint: 'im Museum (-ей)', stem: 'в музе', correct: 'е', options: ['е', 'и', 'я'] }
+    ];
+
+    const app = document.getElementById('app');
+    
+    // Speichert User-Eingaben: { 1: 'е', 2: 'и', ... }
+    let userState = {};
+
+    // 1. Karten rendern
+    function renderApp() {
+        app.innerHTML = '';
+        tasks.forEach(task => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${task.id}`;
+
+            // Buttons HTML generieren
+            const buttonsHtml = task.options.map(opt => `
+                <button class="option-btn" 
+                        onclick="selectOption(${task.id}, '${opt}')"
+                        data-val="${opt}">
+                    ${opt}
+                </button>
+            `).join('');
+
+            card.innerHTML = `
+                <div class="emoji">${task.emoji}</div>
+                <div class="hint">${task.hint}</div>
+                <div class="word-container">
+                    ${task.stem}<span class="gap" id="gap-${task.id}">_</span>
+                </div>
+                <div class="options-container">
+                    ${buttonsHtml}
+                </div>
+            `;
+            app.appendChild(card);
+        });
+    }
+
+    // 2. Interaktion: Auswählen
+    window.selectOption = function(id, value) {
+        userState[id] = value;
+
+        // Lücke visuell füllen
+        const gap = document.getElementById(`gap-${id}`);
+        gap.textContent = value;
+        gap.classList.remove('correct', 'wrong');
+        gap.classList.add('filled');
+
+        // Buttons aktualisieren
+        const card = document.getElementById(`card-${id}`);
+        const buttons = card.querySelectorAll('.option-btn');
+        
+        buttons.forEach(btn => {
+            btn.classList.remove('active', 'mark-correct', 'mark-wrong');
+            if(btn.dataset.val === value) {
+                btn.classList.add('active');
+            }
+        });
+    };
+
+    // 3. Überprüfen
+    window.checkAnswers = function() {
+        tasks.forEach(task => {
+            const userVal = userState[task.id];
+            const gap = document.getElementById(`gap-${task.id}`);
+            const card = document.getElementById(`card-${task.id}`);
+            const buttons = card.querySelectorAll('.option-btn');
+
+            // Reset visuelle Marker
+            gap.classList.remove('correct', 'wrong');
+
+            if (!userVal) return; // Nichts ausgewählt
+
+            if (userVal === task.correct) {
+                // Richtig
+                gap.classList.add('correct');
+                // Button grün färben
+                buttons.forEach(btn => {
+                    if (btn.dataset.val === userVal) btn.classList.add('mark-correct');
+                });
+            } else {
+                // Falsch
+                gap.classList.add('wrong');
+                // Button visuell deaktivieren/falsch markieren
+                buttons.forEach(btn => {
+                    if (btn.dataset.val === userVal) btn.classList.add('mark-wrong');
+                });
+            }
+        });
+    };
+
+    // 4. Lösung anzeigen
+    window.showSolution = function() {
+        // Erst alles zurücksetzen
+        resetUIOnly();
+
+        tasks.forEach(task => {
+            // State setzen (optional, falls danach nochmal "Überprüfen" geklickt wird)
+            userState[task.id] = task.correct;
+
+            // Lücke füllen
+            const gap = document.getElementById(`gap-${task.id}`);
+            gap.textContent = task.correct;
+            gap.classList.add('correct', 'filled');
+
+            // Richtigen Button aktivieren
+            const card = document.getElementById(`card-${task.id}`);
+            const buttons = card.querySelectorAll('.option-btn');
+            
+            buttons.forEach(btn => {
+                if(btn.dataset.val === task.correct) {
+                    btn.classList.add('active', 'mark-correct');
+                }
+            });
+        });
+    };
+
+    // 5. Zurücksetzen
+    window.resetAnswers = function() {
+        userState = {};
+        resetUIOnly();
+        
+        // Lückentext zurücksetzen
+        tasks.forEach(task => {
+            const gap = document.getElementById(`gap-${task.id}`);
+            gap.textContent = '_';
+            gap.classList.remove('filled');
+        });
+    };
+
+    // Hilfsfunktion: Setzt nur Klassen zurück
+    function resetUIOnly() {
+        const gaps = document.querySelectorAll('.gap');
+        gaps.forEach(g => g.classList.remove('correct', 'wrong'));
+
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(b => b.classList.remove('active', 'mark-correct', 'mark-wrong'));
+    }
+
+    // Init
+    renderApp();
+
+</script>
+
+</body>
+</html>
