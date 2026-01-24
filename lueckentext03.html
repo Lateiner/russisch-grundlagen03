@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Präpositionen: Drag & Drop</title>
+    <style>
+        :root {
+            /* Grünes Farbschema */
+            --bg-color: #f1f8e9;
+            --card-bg: #ffffff;
+            --primary-dark: #2e7d32;
+            --primary-light: #4caf50;
+            --accent-color: #81c784;
+            --text-color: #333;
+            --dropzone-bg: #e0e0e0;
+            --dropzone-active: #c8e6c9;
+            --error-color: #d32f2f;
+            --success-color: #388e3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: 0;
+            flex-grow: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 20px 10px 20px;
+            color: var(--primary-dark);
+        }
+
+        h1 { margin: 0; font-size: 1.6rem; } 
+        .subtitle { margin-top: 5px; opacity: 0.8; font-size: 0.95rem; }
+
+        /* --- STICKY DRAG BOX (Floating Island Style) --- */
+        .drag-source-container {
+            position: sticky;
+            top: 20px; /* Abstand vom oberen Rand */
+            z-index: 100;
+            
+            /* Hier die Magie für den "Kasten": */
+            width: fit-content;      /* Nur so breit wie nötig */
+            margin: 0 auto;          /* Horizontal zentriert */
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            
+            border: 1px solid var(--primary-light);
+            border-radius: 50px;     /* Pillen-Form / Abgerundeter Kasten */
+            padding: 10px 25px;      /* Platz innen */
+            
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Schöner Schatten für Schwebe-Effekt */
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .draggable-item {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 8px 24px;
+            border-radius: 20px;
+            cursor: grab;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s, background-color 0.2s;
+            user-select: none;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        .draggable-item.selected {
+            background-color: var(--primary-light);
+            outline: 3px solid var(--accent-color); /* Stärkerer Rahmen bei Auswahl */
+            transform: scale(1.1);
+        }
+
+        /* --- TEXT BEREICH --- */
+        .text-card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            margin-top: 30px; /* Mehr Abstand zum schwebenden Kasten */
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            font-size: 1.25rem;
+            line-height: 2.2;
+        }
+
+        /* Die Lücken */
+        .dropzone {
+            display: inline-block;
+            min-width: 50px;
+            height: 32px;
+            border-bottom: 2px solid var(--primary-dark);
+            background-color: var(--dropzone-bg);
+            margin: 0 5px;
+            vertical-align: middle;
+            text-align: center;
+            color: var(--primary-dark);
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+            padding: 0 5px;
+            line-height: 32px;
+        }
+
+        .dropzone.drag-over {
+            background-color: var(--dropzone-active);
+            border-bottom-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .dropzone.correct {
+            background-color: #c8e6c9;
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .dropzone.wrong {
+            background-color: #ffcdd2;
+            border-color: var(--error-color);
+            color: var(--error-color);
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* --- CONTROLS --- */
+        .controls-area {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            color: white;
+            transition: opacity 0.2s;
+            min-width: 140px;
+        }
+        .action-btn:hover { opacity: 0.9; }
+
+        .btn-check { background-color: var(--primary-dark); }
+        .btn-reset { background-color: #757575; }
+        .btn-solve { background-color: #f57c00; }
+
+        /* --- FEEDBACK --- */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+            font-size: 1.1rem;
+            border: 2px solid transparent;
+        }
+        
+        .feedback-success-style {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-color: #2e7d32;
+            animation: popIn 0.5s ease;
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .draggable-item { padding: 6px 16px; font-size: 1rem; }
+            .text-card { padding: 20px; font-size: 1.1rem; }
+            .action-btn { width: 100%; }
+            /* Auf Handy darf der Kasten etwas breiter sein, damit er nicht zu klein wirkt */
+            .drag-source-container { width: 90%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Russisch: Lückentext</h1>
+        <div class="subtitle">Ziehen Sie die Präposition in die Lücke (Drag & Drop) oder tippen Sie.</div>
+    </header>
+
+    <!-- Ziehbare Elemente (Sticky Floating Box) -->
+    <div class="drag-source-container">
+        <div class="draggable-item" draggable="true" data-val="в" id="drag-v">в</div>
+        <div class="draggable-item" draggable="true" data-val="во" id="drag-vo">во</div>
+        <div class="draggable-item" draggable="true" data-val="на" id="drag-na">на</div>
+    </div>
+
+    <div class="container">
+        
+        <!-- Lückentext -->
+        <div class="text-card">
+            <p>
+                Привет! Меня зовут Анна. Я живу 
+                <span class="dropzone" data-solution="в"></span> Москве.
+                
+                Мой папа работает 
+                <span class="dropzone" data-solution="на"></span> заводе,
+                а мама работает 
+                <span class="dropzone" data-solution="в"></span> школе.
+                
+                Вчера мы были 
+                <span class="dropzone" data-solution="на"></span> концерте,
+                а потом гуляли 
+                <span class="dropzone" data-solution="в"></span> парке.
+                
+                Я мечтаю жить 
+                <span class="dropzone" data-solution="во"></span> Франции,
+                но сейчас я учусь 
+                <span class="dropzone" data-solution="в"></span> университете.
+                
+                Летом мы отдыхали 
+                <span class="dropzone" data-solution="во"></span> Вьетнаме
+                и 
+                <span class="dropzone" data-solution="на"></span> Кипре.
+                
+                Сейчас мой брат 
+                <span class="dropzone" data-solution="на"></span> работе,
+                он сидит 
+                <span class="dropzone" data-solution="на"></span> собрании.
+            </p>
+        </div>
+
+        <div class="feedback-box" id="feedback"></div>
+
+        <!-- Buttons -->
+        <div class="controls-area">
+            <button class="action-btn btn-check" onclick="checkAnswers()">Überprüfen</button>
+            <button class="action-btn btn-reset" onclick="resetApp()">Zurücksetzen</button>
+            <button class="action-btn btn-solve" onclick="showSolution()">Lösung anzeigen</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Variablen ---
+        let selectedValue = null; 
+        const draggables = document.querySelectorAll('.draggable-item');
+        const dropzones = document.querySelectorAll('.dropzone');
+        const feedbackBox = document.getElementById('feedback');
+
+        // --- Event Listeners für Sources ---
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', draggable.getAttribute('data-val'));
+                e.dataTransfer.effectAllowed = 'copy';
+                resetSelection();
+            });
+
+            draggable.addEventListener('click', () => {
+                const val = draggable.getAttribute('data-val');
+                if (selectedValue === val) {
+                    resetSelection();
+                } else {
+                    resetSelection();
+                    selectedValue = val;
+                    draggable.classList.add('selected');
+                }
+            });
+        });
+
+        function resetSelection() {
+            selectedValue = null;
+            draggables.forEach(d => d.classList.remove('selected'));
+        }
+
+        // --- Event Listeners für Dropzones ---
+        dropzones.forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const val = e.dataTransfer.getData('text/plain');
+                if (val) fillZone(zone, val);
+            });
+
+            zone.addEventListener('click', () => {
+                if (selectedValue) {
+                    fillZone(zone, selectedValue);
+                } else {
+                    zone.textContent = '';
+                    zone.classList.remove('correct', 'wrong');
+                }
+            });
+        });
+
+        function fillZone(zone, value) {
+            zone.textContent = value;
+            zone.classList.remove('correct', 'wrong');
+        }
+
+        // --- Logik: Überprüfen ---
+        function checkAnswers() {
+            let errors = 0;
+            let empty = 0;
+            
+            dropzones.forEach(zone => {
+                const userVal = zone.textContent.trim().toLowerCase();
+                const correctVal = zone.getAttribute('data-solution');
+
+                zone.classList.remove('correct', 'wrong');
+
+                if (!userVal) {
+                    empty++;
+                } else if (userVal === correctVal) {
+                    zone.classList.add('correct');
+                } else {
+                    zone.classList.add('wrong');
+                    errors++;
+                }
+            });
+
+            feedbackBox.style.display = 'block';
+            
+            // Lob
+            if (empty === 0 && errors === 0) {
+                feedbackBox.className = 'feedback-box feedback-success-style';
+                feedbackBox.innerHTML = "🌟 Großartig! Alle Lücken sind richtig ausgefüllt! Молодец!";
+            } else {
+                feedbackBox.className = 'feedback-box';
+                feedbackBox.style.backgroundColor = '#ffcdd2';
+                feedbackBox.style.color = '#c62828';
+                feedbackBox.style.borderColor = '#e57373';
+                
+                let msg = [];
+                if (empty > 0) msg.push(empty + " Lücken sind noch leer.");
+                if (errors > 0) msg.push(errors + " Fehler gefunden.");
+                feedbackBox.textContent = msg.join(" ");
+            }
+        }
+
+        function resetApp() {
+            dropzones.forEach(zone => {
+                zone.textContent = '';
+                zone.classList.remove('correct', 'wrong');
+            });
+            feedbackBox.style.display = 'none';
+            resetSelection();
+        }
+
+        function showSolution() {
+            resetSelection();
+            dropzones.forEach(zone => {
+                zone.textContent = zone.getAttribute('data-solution');
+                zone.classList.remove('correct', 'wrong');
+                zone.classList.add('correct');
+            });
+            feedbackBox.style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
