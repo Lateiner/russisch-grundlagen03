@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Präpositionen: Bild-Wort-Matching</title>
+    <style>
+        :root {
+            /* Farbschema: Angenehme Grüntöne */
+            --bg-color: #f1f8e9;           /* Helles Hintergrundgrün */
+            --card-bg: #ffffff;            /* Weiß für Karten */
+            --primary-dark: #2e7d32;       /* Dunkelgrün für Texte/Header */
+            --primary-btn: #4caf50;        /* Standard Button Grün */
+            --primary-btn-hover: #43a047;
+            --accent-green: #a5d6a7;       /* Selektion */
+            
+            --correct-color: #388e3c;      /* Erfolgsgrün */
+            --wrong-color: #d32f2f;        /* Fehlerrot */
+            
+            --text-main: #333;
+            --text-light: #666;
+            
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 100px; /* Platz für Footer */
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--primary-dark);
+        }
+
+        h1 { margin: 0; font-size: 2rem; }
+        .subtitle { margin-top: 10px; opacity: 0.8; font-size: 1.1rem; }
+
+        /* --- GRID LAYOUT --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* --- CARD DESIGN --- */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+            border-top: 5px solid var(--primary-btn);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        .emoji-img {
+            font-size: 4.5rem;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            cursor: default;
+        }
+
+        .de-word {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+        }
+
+        /* --- BUTTONS IN CARD --- */
+        .prep-options {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .prep-btn {
+            flex: 1;
+            padding: 10px 0;
+            border: 2px solid #e0e0e0;
+            background-color: white;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.2s;
+            /* Wichtig für Mobile Touch */
+            touch-action: manipulation; 
+        }
+
+        .prep-btn:hover {
+            background-color: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        /* Ausgewählter Zustand (User klickt) */
+        .prep-btn.selected {
+            background-color: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* Ergebnis-Zustände */
+        .prep-btn.result-correct {
+            background-color: var(--correct-color) !important;
+            color: white !important;
+            border-color: var(--correct-color) !important;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+        }
+
+        .prep-btn.result-wrong {
+            background-color: var(--wrong-color) !important;
+            color: white !important;
+            border-color: var(--wrong-color) !important;
+            opacity: 0.8;
+        }
+
+        /* --- LÖSUNG (Versteckt) --- */
+        .solution-reveal {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+            background-color: var(--bg-color);
+            padding: 8px 15px;
+            border-radius: 6px;
+            display: none; /* Standardmäßig unsichtbar */
+            width: 100%;
+        }
+
+        .solution-reveal.visible {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .solution-reveal strong {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        /* --- GLOBAL CONTROLS (Unten) --- */
+        .global-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            min-width: 140px;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .ctrl-btn:active { transform: scale(0.95); }
+        .ctrl-btn:hover { opacity: 0.9; }
+
+        .btn-check { background-color: var(--primary-dark); }
+        .btn-reset { background-color: #757575; }
+        .btn-solve { background-color: #ff9800; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .global-controls { flex-direction: column; padding: 10px; gap: 10px; }
+            .ctrl-btn { width: 100%; padding: 12px; }
+            body { padding-bottom: 180px; } /* Mehr Platz für vertikale Buttons */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>В, ВО oder НА?</h1>
+        <div class="subtitle">Wähle die passende Präposition für das Bild.</div>
+    </header>
+
+    <!-- Das Raster wird per JS gefüllt -->
+    <div class="grid-container" id="cards-container"></div>
+</div>
+
+<!-- Steuerung unten -->
+<div class="global-controls">
+    <button class="ctrl-btn btn-check" onclick="checkAll()">Überprüfen</button>
+    <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+    <button class="ctrl-btn btn-solve" onclick="showAllSolutions()">Lösung anzeigen</button>
+</div>
+
+<script>
+    /**
+     * Daten für die Aufgaben.
+     * type: 'v', 'vo', 'na' (Lösungskategorie - intern für Logik)
+     * de: Deutsches Wort
+     * ru: Russisches Wort (Lösungstext)
+     * hint: Optionaler Hinweis (Grammatikregel)
+     */
+    const tasks = [
+        { id: 1, emoji: '🏫', de: 'Schule', type: 'v', ru: 'в школе', hint: 'Geschlossenes Gebäude' },
+        { id: 2, emoji: '🎸', de: 'Konzert', type: 'na', ru: 'на концерте', hint: 'Veranstaltung' },
+        { id: 3, emoji: '🍽️', de: 'Tisch', type: 'na', ru: 'на столе', hint: 'Oberfläche' },
+        { id: 4, emoji: '🌳', de: 'Park', type: 'v', ru: 'в парке', hint: 'Geschlossener Raum (Konzept)' },
+        { id: 5, emoji: '🇫🇷', de: 'Frankreich', type: 'vo', ru: 'во Франции', hint: 'Phonetik (Fr...)' },
+        { id: 6, emoji: '🏭', de: 'Werk/Fabrik', type: 'na', ru: 'на заводе', hint: 'Ausnahme (Arbeitsort)' },
+        { id: 7, emoji: '🛋️', de: 'Zimmer', type: 'v', ru: 'в комнате', hint: 'Geschlossener Raum' },
+        { id: 8, emoji: '🏟️', de: 'Stadion', type: 'na', ru: 'на стадионе', hint: 'Offener Ort/Veranstaltung' },
+        { id: 9, emoji: '🇷🇺', de: 'Wladiwostok', type: 'vo', ru: 'во Владивостоке', hint: 'Phonetik (Vl...)' },
+        { id: 10, emoji: '🏣', de: 'Post', type: 'na', ru: 'на почте', hint: 'Institution (offen)' },
+        { id: 11, emoji: '🇻🇳', de: 'Vietnam', type: 'vo', ru: 'во Вьетнаме', hint: 'Phonetik (Vi...)' },
+        { id: 12, emoji: '🏝️', de: 'Insel', type: 'na', ru: 'на острове', hint: 'Geografie' }
+    ];
+
+    // Container finden
+    const container = document.getElementById('cards-container');
+
+    // Initiale Generierung der Karten
+    function renderCards() {
+        container.innerHTML = '';
+        tasks.forEach(task => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${task.id}`;
+            
+            // Wichtig: data-choice Attribut für robuste Erkennung
+            card.innerHTML = `
+                <div class="emoji-img">${task.emoji}</div>
+                <div class="de-word">${task.de}</div>
+                
+                <div class="prep-options">
+                    <button class="prep-btn" data-choice="v" onclick="selectOption(${task.id}, 'v')">в</button>
+                    <button class="prep-btn" data-choice="vo" onclick="selectOption(${task.id}, 'vo')">во</button>
+                    <button class="prep-btn" data-choice="na" onclick="selectOption(${task.id}, 'na')">на</button>
+                </div>
+                
+                <div class="solution-reveal" id="sol-${task.id}">
+                    <strong>Lösung:</strong>
+                    <span style="font-size: 1.2rem; font-weight: bold;">${task.ru}</span>
+                    <div style="font-size: 0.9rem; color: #555; margin-top: 4px;">(${task.hint})</div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Speichert die Auswahl des Nutzers: { 1: 'v', 2: 'na', ... }
+    let userSelections = {};
+
+    // 1. Auswahl-Logik
+    // Jetzt global verfügbar am window-Objekt
+    window.selectOption = function(cardId, choice) {
+        userSelections[cardId] = choice;
+        
+        // Visuelles Feedback (Active State)
+        const card = document.getElementById(`card-${cardId}`);
+        const buttons = card.querySelectorAll('.prep-btn');
+        
+        // Reset buttons in dieser Karte und setze 'selected' basierend auf data-choice
+        buttons.forEach(btn => {
+            btn.classList.remove('selected', 'result-correct', 'result-wrong');
+            
+            if(btn.dataset.choice === choice) {
+                btn.classList.add('selected');
+            }
+        });
+    };
+
+    // 2. Überprüfen-Logik
+    window.checkAll = function() {
+        tasks.forEach(task => {
+            const card = document.getElementById(`card-${task.id}`);
+            const buttons = card.querySelectorAll('.prep-btn');
+            const userChoice = userSelections[task.id];
+            
+            // Vorherige Status entfernen
+            buttons.forEach(b => b.classList.remove('result-correct', 'result-wrong'));
+
+            if (!userChoice) return;
+
+            // Button finden, den der User geklickt hat (via data-choice)
+            let selectedBtn;
+            buttons.forEach(btn => {
+                if(btn.dataset.choice === userChoice) selectedBtn = btn;
+            });
+
+            if (userChoice === task.type) {
+                // Richtig
+                if(selectedBtn) selectedBtn.classList.add('result-correct');
+            } else {
+                // Falsch
+                if(selectedBtn) selectedBtn.classList.add('result-wrong');
+            }
+        });
+    };
+
+    // 3. Lösung anzeigen
+    window.showAllSolutions = function() {
+        // Erst resetten, damit keine roten Buttons stören
+        resetUIOnly();
+
+        tasks.forEach(task => {
+            const card = document.getElementById(`card-${task.id}`);
+            const buttons = card.querySelectorAll('.prep-btn');
+            const solBox = document.getElementById(`sol-${task.id}`);
+
+            // Richtigen Button grün markieren (via data-choice)
+            buttons.forEach(btn => {
+                if(btn.dataset.choice === task.type) {
+                    btn.classList.add('result-correct');
+                    btn.classList.add('selected'); // Damit er gedrückt aussieht
+                }
+            });
+
+            // Text aufdecken
+            solBox.classList.add('visible');
+        });
+    };
+
+    // 4. Zurücksetzen
+    window.resetAll = function() {
+        userSelections = {};
+        resetUIOnly();
+    };
+
+    // Hilfsfunktion: Setzt nur die Farben und Texte zurück
+    function resetUIOnly() {
+        const allButtons = document.querySelectorAll('.prep-btn');
+        allButtons.forEach(btn => btn.classList.remove('selected', 'result-correct', 'result-wrong'));
+        
+        const allSolutions = document.querySelectorAll('.solution-reveal');
+        allSolutions.forEach(sol => sol.classList.remove('visible'));
+    }
+
+    // App starten
+    renderCards();
+
+</script>
+
+</body>
+</html>
